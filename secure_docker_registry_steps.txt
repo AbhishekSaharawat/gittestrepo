@@ -1,6 +1,7 @@
 ##### Valid certificate from authorized Certificate Authority should be placed at path /etc/ssl/certs/ca-certificates.crt but certificates from openssl are not much valid bcz system considers them as not much valid so inka Pehle configuration rakh lo at file in path '/etc/ssl/openssl.conf'
+ 
 
-
+    This should be done below [v3_ca]
 -> subjectAltName=IP:3.7.68.167 (inside /etc/ssl/openssl.conf)
 
 
