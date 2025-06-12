@@ -1,0 +1,82 @@
+##### Valid certificate from authorized Certificate Authority should be placed at path /etc/ssl/certs/ca-certificates.crt but certificates from openssl are not much valid bcz system considers them as not much valid so inka Pehle configuration rakh lo at file in path '/etc/ssl/openssl.conf'
+
+
+-> subjectAltName=IP:3.7.68.167 (inside /etc/ssl/openssl.conf)
+
+
+-> mkdir -p /certificates
+
+- .cd certificates
+
+-> openssl req -newkey rsa:4096 -nodes -sha256 -keyout domain.key -x509 -days 365 -out domain.crt
+
+   provide Common Name (e.g. server FQDN or YOUR name) []:3.7.68.167(public IP of your machine)  
+
+->docker run -d -p 5000:5000 --restart=always --name registry -v ~/certificates:/certificates -e REGISTRY_HTTP_TLS_CERTIFICATE=/certificates/domain.crt -e    REGISTRY_HTTP_TLS_KEY=/certificates/domain.key registry:2
+
+
+
+
+
+Ab docker daemon ko pata lagega k 1 docker registry bani h and uska kya certificate h .Path '/etc/docker/certs.d/' is Docker's custom certificate trust store, specifically used by the Docker daemon to trust private registries over HTTPS. Just like our system have it's own CA Trust Store(/etc/ssl/certs/ca-certificates.crt (Debian/Ubuntu)
+/etc/pki/tls/certs/ca-bundle.crt (RHEL/CentOS) ) which is system wide means all utilities like curl,ssh ,scp can refer certificate present in this path as valid certificate. dusra docker client(2nd EC2 MAchine me bhi same path add karna padega bcz 2nd docker client is path pe rakhe hue public certificate se match karega 1st EC2 machine k docker registry se and jese hi match hoga connection approve ho jayega ).
+-> mkdir -p /etc/docker/certs.d/IP_ADDRESS_OF_YOUR_VM:5000
+
+Now copy the certificate to this path with new name as ca.crt(certificate Authority. Isi k name se certificate hone chahiye docker daemon k knowledge me )
+-> cp ~/certificates/domain.crt /etc/docker/certs.d/IP_ADDRESS_OF_YOUR_VM:500/ca.crt
+
+Now reload the docker service 
+-> service docker reload
+
+Now tag an image and then push to your secure Docker Registry which you have just created.
+-> docker image tag nginx 3.7.68.167:5000/nginx
+-> docker push nginx 3.7.68.167:5000/nginx (You will see that your image is pushed to your secure Docker registry)
+
+
+
+
+QUESTION asked to copilot
+-------------------------
+When we create a secure docker registry with help of openssl in 1 ec2 instance then why do we need to copy and paste the same openssl certificate to second ec2 instance with same IP name under certs.d like /etc/docker/certs.d/iPADDRESSofMACHINE1:5000/ca.crt?
+Copilot said:
+Copilot
+
+Answer by Copilot
+------------------
+Great question! When you set up a secure Docker registry using OpenSSL-generated certificates on one EC2 instance, and then want to access it securely from another EC2 instance, you need to trust the certificate authority (CA) that signed the registry's certificate. Here's why copying the certificate is necessary:
+
+🔐 Why You Need to Copy the Certificate
+Docker clients verify TLS certificates
+When the second EC2 instance (the Docker client) tries to connect to the registry on the first EC2 instance over HTTPS, it checks if the certificate presented by the registry is trusted.
+
+Self-signed certificates are not trusted by default
+If you used OpenSSL to create a self-signed certificate, it's not issued by a public Certificate Authority (like Let's Encrypt or DigiCert). So, Docker (on the second EC2) will reject the connection unless you explicitly tell it to trust that certificate.
+
+Docker uses /etc/docker/certs.d/ to store trusted certs
+By placing the ca.crt file in:
+
+/etc/docker/certs.d/<REGISTRY_HOST>:<PORT>/ca.crt
+you're telling Docker:
+
+"Trust this certificate when connecting to this registry."
+
+📁 Example
+If your registry is at 10.0.0.1:5000, then on the second EC2 instance, you should place the certificate like this:
+
+
+This allows Docker to securely pull/push images to the private registry without TLS errors.
+
+✅ Summary
+You need to copy the certificate because:
+
+The registry uses a self-signed certificate.
+Docker clients must explicitly trust that certificate.
+Placing it under /etc/docker/certs.d/<host>:<port>/ca.crt is how Docker knows to trust it.
+
+
+
+
+
+
+
+
