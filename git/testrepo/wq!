@@ -1,0 +1,52 @@
+#!/bin/bash
+
+values="$@"
+function add()
+{
+
+ for args in "$@";
+ do
+ sum=0
+ sum=$((sum + args)) 
+ echo "addition of numbers is ${sum}" 
+ done 
+}
+
+add 1 2 3 5
+:<<'COMMENT'
+function multiply() {
+
+}
+
+
+function divide() {
+
+}
+COMMENT
+
+
+for args in $*;
+do
+    echo "Using the '$*' and value is "$args""
+done
+
+for agrs in $@;
+do
+    echo "Using '$@' and value is "$args""
+done
+
+for args in "$*";
+do
+    echo "Using "$*" and value is "$args" "
+done
+
+for args in "$@";
+do
+    echo "Using "$@" and value is "$args" "
+done	
+
+echo "$#(($@))"
+echo "$#(($*))"
+
+echo "$#(("$@"))"
+echo "$#(("$*"))"

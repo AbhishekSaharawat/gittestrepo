@@ -1,0 +1,50 @@
+Q)Explain Parameter Expansion in LINUX
+
+Ans)Parameter expansion in Linux is a feature of the shell that allows you to manipulate variables and their values in various ways. It is denoted by the $ symbol, often enclosed in curly braces {} for clarity and to avoid ambiguity. Here's a breakdown of its key uses:
+
+Basic Syntax
+bash
+${parameter}
+This expands to the value of the variable parameter.
+
+Common Forms of Parameter Expansion
+Default Value Substitution:
+
+${parameter:-word}: If parameter is unset or null, it substitutes word.
+
+${parameter:=word}: If parameter is unset or null, it assigns word to parameter.
+
+Error Handling:
+
+${parameter:?word}: If parameter is unset or null, it displays word as an error message and exits the script.
+
+Alternative Value:
+
+${parameter:+word}: If parameter is set and not null, it substitutes word.
+
+Substring Extraction:
+
+${parameter:offset:length}: Extracts a substring starting at offset with the specified length.
+
+Length of Variable:
+
+${#parameter}: Returns the length of the value of parameter.
+
+Pattern Matching:
+
+${parameter#pattern}: Removes the shortest match of pattern from the beginning.
+
+${parameter##pattern}: Removes the longest match of pattern from the beginning.
+
+${parameter%pattern}: Removes the shortest match of pattern from the end.
+
+${parameter%%pattern}: Removes the longest match of pattern from the end.
+
+Example
+bash
+VAR="Hello, World!"
+echo ${VAR:-"Default"}  # Outputs: Hello, World!
+echo ${UNSET_VAR:-"Default"}  # Outputs: Default
+echo ${#VAR}  # Outputs: 13 (length of VAR)
+echo ${VAR:7:5}  # Outputs: World
+Parameter expansion is a powerful tool in shell scripting, enabling dynamic and efficient handling of variables. Let me know if you'd like to dive deeper into any specific aspect!
