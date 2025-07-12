@@ -1,20 +1,19 @@
 ##### Valid certificate from authorized Certificate Authority should be placed at path /etc/ssl/certs/ca-certificates.crt but certificates from openssl are not much valid bcz system considers them as not much valid so inka Pehle configuration rakh lo at file in path '/etc/ssl/openssl.conf'
- 
 
-    This should be done below [v3_ca]
--> subjectAltName=IP:3.7.68.167 (inside /etc/ssl/openssl.conf)
+
+-> subjectAltName=IP:3.7.68.167 ( inside /etc/ssl/openssl.conf under [v3_ca] )
 
 
 -> mkdir -p /certificates
 
-- .cd certificates
+-> cd certificates
 
 -> openssl req -newkey rsa:4096 -nodes -sha256 -keyout domain.key -x509 -days 365 -out domain.crt
 
    provide Common Name (e.g. server FQDN or YOUR name) []:3.7.68.167(public IP of your machine)  
-
-->docker run -d -p 5000:5000 --restart=always --name registry -v ~/certificates:/certificates -e REGISTRY_HTTP_TLS_CERTIFICATE=/certificates/domain.crt -e    REGISTRY_HTTP_TLS_KEY=/certificates/domain.key registry:2
-
+			
+-> docker run -d -p 5000:5000 --restart=always --name registry -v ~/certificates:/certificates -e REGISTRY_HTTP_TLS_CERTIFICATE=/certificates/domain.crt -e    REGISTRY_HTTP_TLS_KEY=/certificates/domain.key registry:2
+7
 
 
 
@@ -23,7 +22,8 @@ Ab docker daemon ko pata lagega k 1 docker registry bani h and uska kya certific
 /etc/pki/tls/certs/ca-bundle.crt (RHEL/CentOS) ) which is system wide means all utilities like curl,ssh ,scp can refer certificate present in this path as valid certificate. dusra docker client(2nd EC2 MAchine me bhi same path add karna padega bcz 2nd docker client is path pe rakhe hue public certificate se match karega 1st EC2 machine k docker registry se and jese hi match hoga connection approve ho jayega ).
 -> mkdir -p /etc/docker/certs.d/IP_ADDRESS_OF_YOUR_VM:5000
 
-Now copy the certificate to this path with new name as ca.crt(certificate Authority. Isi k name se certificate hone chahiye docker daemon k knowledge me )
+Now copy the certificate to this path with new name as ca.crt(certificate Authority. Isi k name se certificate hone chahiye docker daemon k knowledge me ).
+Basically ye 1 configuration h registry ki and jab bhi hamare Docker Host(VM) ko request milegi to docker daemon isi configuration me se public key(certificate) ko pick karega aur fir actual running container(registry) se match karega . agar match hua to access kar sakte ho aap is registry ko(registry)
 -> cp ~/certificates/domain.crt /etc/docker/certs.d/IP_ADDRESS_OF_YOUR_VM:500/ca.crt
 
 Now reload the docker service 
@@ -32,6 +32,10 @@ Now reload the docker service
 Now tag an image and then push to your secure Docker Registry which you have just created.
 -> docker image tag nginx 3.7.68.167:5000/nginx
 -> docker push nginx 3.7.68.167:5000/nginx (You will see that your image is pushed to your secure Docker registry)
+
+
+
+
 
 
 
@@ -73,11 +77,3 @@ You need to copy the certificate because:
 The registry uses a self-signed certificate.
 Docker clients must explicitly trust that certificate.
 Placing it under /etc/docker/certs.d/<host>:<port>/ca.crt is how Docker knows to trust it.
-
-
-
-
-
-
-
-
